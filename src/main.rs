@@ -2,6 +2,7 @@ use anyhow::Result;
 use iroh::protocol::Router;
 use iroh::{Endpoint, SecretKey};
 use iroh_gossip::net::Gossip;
+use iroh_gossip::proto::TopicId;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -21,6 +22,12 @@ async fn main() -> Result<()> {
         .accept(iroh_gossip::ALPN, gossip.clone())
         .spawn()
         .await?;
+
+    let id: TopicId = TopicId::from_bytes(rand::random());
+    let peer_ids = vec![];
+    let (sender, _reciver) = gossip.subscribe(id,peer_ids)?.split();
+    sender.broadcast("sup".into()).await?;
+
 
     router.shutdown().await?;
 
