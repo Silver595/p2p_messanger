@@ -28,11 +28,18 @@ async fn main() -> Result<()> {
         .spawn()
         .await?;
 
-    let id: TopicId = TopicId::from_bytes(rand::random());
-    let peer_ids = vec![];
-    let (sender, receiver) = gossip.subscribe(id,peer_ids)?.split();
+    let topic: TopicId = TopicId::from_bytes(rand::random());
+    let peers = vec![];
+    let (sender, receiver) = gossip.subscribe(topic,peers.clone())?.split();
     
     tokio::spawn(subscribe_loop(receiver));
+
+    let ticket = Ticket {
+        topic,
+        peers:vec![],
+    };
+
+    println!("> ticket to join us: {ticket}");    
 
     sender.broadcast("sup".into()).await?;
 
